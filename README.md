@@ -18,7 +18,7 @@ class LiveEventViewModel : ViewModel() {
     val dataState: LiveData<String> = clickedDataState
     
     private val clickedDataState2 = LiveEventData("event")
-    val dataState2: LiveData<String> = clickedState2
+    val dataState2: LiveData<String> = clickedDataState2
 
     fun clicked() {
         clickedState.callEvent() // Main Thread .value call
