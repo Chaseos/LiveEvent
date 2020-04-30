@@ -20,16 +20,16 @@ class LiveEventViewModel : ViewModel() {
     private val clickedDataState2 = LiveEventData("event")
     val dataState2: LiveData<String> = clickedState2
 
-    fun clicked() { // Below are just examples
-        clickedState.callEvent()
-        clickedState.postEvent()
-        clickedState.throttleEvent()
-        clickedState.throttlePostEvent()
+    fun clicked() {
+        clickedState.callEvent() // Main Thread .value call
+        clickedState.postEvent() // Any thread post call
+        clickedState.throttleEvent() // Main thread .value call with 1000ms throttle (option to pass in millisecond time as Long)
+        clickedState.throttlePostEvent() // Any thread post call with 1000ms throttle (option to pass in millisecond time as Long)
         
-        clickedDataState.value = ...
-        clickedDataState.post(...)
-        clickedDataState.throttleEvent(...)
-        clickedDataState.throttlePostEvent(...)
+        clickedDataState.value = ... // Main Thread
+        clickedDataState.post(...) // Any thread post call
+        clickedDataState.throttleEvent(...) // Main thread .value call with 1000ms throttle (option to pass in millisecond time as Long)
+        clickedDataState.throttlePostEvent(...) // Any thread post call with 1000ms throttle (option to pass in millisecond time as 
     }
 }
 ```
