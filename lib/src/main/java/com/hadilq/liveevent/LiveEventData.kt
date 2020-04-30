@@ -22,33 +22,35 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 
-class LiveEvent : MediatorLiveData<Unit>() {
+class LiveEventData<T>() : MediatorLiveData<T>() {
+    constructor(value: T) : this() { super.setValue(value) }
 
-    private val observers = ArraySet<ObserverWrapper<in Unit>>()
+    private val observers = ArraySet<ObserverWrapper<in T>>()
+    private var oldValue: T? = null
     private var lastTimeClicked: Long = 0
 
     @MainThread
-    override fun observe(owner: LifecycleOwner, observer: Observer<in Unit>) {
+    override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
         val wrapper = ObserverWrapper(observer)
         observers.add(wrapper)
         super.observe(owner, wrapper)
     }
 
     @MainThread
-    fun observe(owner: LifecycleOwner, block: () -> Unit) = observe(owner, Observer { it?.let { block() } })
+    fun observe(owner: LifecycleOwner, block: (T) -> Unit) = observe(owner, Observer { it?.let { block(it) } })
 
     @MainThread
-    override fun observeForever(observer: Observer<in Unit>) {
+    override fun observeForever(observer: Observer<in T>) {
         val wrapper = ObserverWrapper(observer)
         observers.add(wrapper)
         super.observeForever(wrapper)
     }
 
     @MainThread
-    fun observeForever(block: () -> Unit) = observeForever(Observer { it?.let { block() } })
+    fun observeForever(block: (T) -> Unit) = observeForever(Observer { it?.let { block(it) } })
 
     @MainThread
-    override fun removeObserver(observer: Observer<in Unit>) {
+    override fun removeObserver(observer: Observer<in T>) {
         if (observers.remove(observer)) {
             super.removeObserver(observer)
             return
@@ -65,34 +67,31 @@ class LiveEvent : MediatorLiveData<Unit>() {
     }
 
     @MainThread
-    override fun setValue(t: Unit?) {
+    override fun setValue(t: T?) {
         observers.forEach { it.newValue() }
         super.setValue(t)
     }
 
-    @MainThread
-    fun throttleEvent(delayMillis: Long = 1000) {
-        if (SystemClock.elapsedRealtime() - lastTimeClicked > delayMillis || BuildConfig.DEBUG) {
-            lastTimeClicked = SystemClock.elapsedRealtime()
-            value = Unit
-        }
-    }
-
-    fun throttlePostEvent(delayMillis: Long = 1000) {
-        if (SystemClock.elapsedRealtime() - lastTimeClicked > delayMillis || BuildConfig.DEBUG) {
-            lastTimeClicked = SystemClock.elapsedRealtime()
-            postEvent()
-        }
-    }
-
-    @MainThread
-    fun callEvent() {
-        value = Unit
-    }
-
-    fun postEvent() {
+    fun postEvent(t: T?) {
         observers.forEach { it.newValue() }
-        super.postValue(Unit)
+        super.postValue(t)
+    }
+
+    @MainThread
+    fun throttleEvent(newValue: T?, delayMillis: Long = 1000) {
+        if (SystemClock.elapsedRealtime() - lastTimeClicked > delayMillis || newValue != oldValue || newValue == null || BuildConfig.DEBUG) {
+            lastTimeClicked = SystemClock.elapsedRealtime()
+            oldValue = newValue
+            value = newValue
+        }
+    }
+
+    fun throttlePostEvent(newValue: T?, delayMillis: Long = 1000) {
+        if (SystemClock.elapsedRealtime() - lastTimeClicked > delayMillis || newValue != oldValue || newValue == null || BuildConfig.DEBUG) {
+            lastTimeClicked = SystemClock.elapsedRealtime()
+            oldValue = newValue
+            postEvent(newValue)
+        }
     }
 
     private class ObserverWrapper<T>(val observer: Observer<T>) : Observer<T> {

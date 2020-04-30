@@ -27,18 +27,18 @@ import org.junit.Test
 import org.junit.rules.TestRule
 
 
-class LiveEventTest {
+class LiveEventDataTest {
 
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private lateinit var liveEvent: LiveEvent
+    private lateinit var liveEventData: LiveEventData<String>
     private lateinit var owner: TestLifecycleOwner
-    private lateinit var observer: Observer<Unit>
+    private lateinit var observer: Observer<String>
 
     @Before
     fun setup() {
-        liveEvent = LiveEvent()
+        liveEventData = LiveEventData()
         owner = TestLifecycleOwner()
         observer = mock()
     }
@@ -47,39 +47,43 @@ class LiveEventTest {
     fun observe() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
+
+        val event = "event"
 
         // When
-        liveEvent.callEvent()
+        liveEventData.value = event
 
         // Then
-        verify(observer, times(1)).onChanged(Unit)
+        verify(observer, times(1)).onChanged(event)
     }
 
     @Test
     fun observeForever() {
         // Given
-        liveEvent.observeForever(observer)
+        liveEventData.observeForever(observer)
+
+        val event = "event"
 
         // When
-        liveEvent.callEvent()
+        liveEventData.value = event
 
         // Then
-        verify(observer, times(1)).onChanged(Unit)
+        verify(observer, times(1)).onChanged(event)
     }
 
     @Test
     fun `observe multi observers`() {
         // Given
         owner.start()
-        val observer1 = mock<Observer<Unit>>()
-        liveEvent.observe(owner, observer)
-        liveEvent.observe(owner, observer1)
+        val observer1 = mock<Observer<String>>()
+        liveEventData.observe(owner, observer)
+        liveEventData.observe(owner, observer1)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -89,14 +93,14 @@ class LiveEventTest {
     @Test
     fun `observeForever multi observers`() {
         // Given
-        val observer1 = mock<Observer<Unit>>()
-        liveEvent.observeForever(observer)
-        liveEvent.observeForever(observer1)
+        val observer1 = mock<Observer<String>>()
+        liveEventData.observeForever(observer)
+        liveEventData.observeForever(observer1)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -107,12 +111,12 @@ class LiveEventTest {
     fun `observe after start`() {
         // Given
         owner.create()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -128,14 +132,14 @@ class LiveEventTest {
     fun `observe after start with multi observers`() {
         // Given
         owner.create()
-        val observer1 = mock<Observer<Unit>>()
-        liveEvent.observe(owner, observer)
-        liveEvent.observe(owner, observer1)
+        val observer1 = mock<Observer<String>>()
+        liveEventData.observe(owner, observer)
+        liveEventData.observe(owner, observer1)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -153,12 +157,12 @@ class LiveEventTest {
     fun `observe after stop`() {
         // Given
         owner.stop()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -168,12 +172,12 @@ class LiveEventTest {
     fun `observe after start again`() {
         // Given
         owner.stop()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -189,12 +193,12 @@ class LiveEventTest {
     fun `observe after one observation`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -216,27 +220,27 @@ class LiveEventTest {
     fun `observe after one observation multi owner`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
         val owner1 = TestLifecycleOwner()
-        val observer1 = mock<Observer<Unit>>()
+        val observer1 = mock<Observer<String>>()
         owner1.start()
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
 
         // Given
-        liveEvent.observe(owner1, observer1)
+        liveEventData.observe(owner1, observer1)
 
         // Then
         verify(observer1, never()).onChanged(event)
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(2)).onChanged(event)
@@ -247,12 +251,12 @@ class LiveEventTest {
     fun `observe after one observation with new owner`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -266,7 +270,7 @@ class LiveEventTest {
         // When
         owner = TestLifecycleOwner()
         observer = mock()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
         owner.start()
 
         // Then
@@ -277,12 +281,12 @@ class LiveEventTest {
     fun `observe after one observation with new owner after start`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -297,7 +301,7 @@ class LiveEventTest {
         owner = TestLifecycleOwner()
         observer = mock()
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -307,19 +311,19 @@ class LiveEventTest {
     fun `observe after remove`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
 
         // When
-        liveEvent.removeObserver(observer)
-        liveEvent.value = event
+        liveEventData.removeObserver(observer)
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -329,13 +333,13 @@ class LiveEventTest {
     fun `observe after remove before emit`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
-        liveEvent.removeObserver(observer)
+        liveEventData.observe(owner, observer)
+        liveEventData.removeObserver(observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -345,19 +349,19 @@ class LiveEventTest {
     fun `observe after remove owner`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
 
         // When
-        liveEvent.removeObservers(owner)
-        liveEvent.value = event
+        liveEventData.removeObservers(owner)
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -367,13 +371,13 @@ class LiveEventTest {
     fun `observe after remove owner before emit`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
-        liveEvent.removeObservers(owner)
+        liveEventData.observe(owner, observer)
+        liveEventData.removeObservers(owner)
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, never()).onChanged(event)
@@ -383,24 +387,24 @@ class LiveEventTest {
     fun `observe after remove multi owner`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
         val owner1 = TestLifecycleOwner()
-        val observer1 = mock<Observer<Unit>>()
+        val observer1 = mock<Observer<String>>()
         owner1.start()
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
         verify(observer1, never()).onChanged(event)
 
         // When
-        liveEvent.observe(owner1, observer1)
-        liveEvent.removeObserver(observer)
-        liveEvent.value = event
+        liveEventData.observe(owner1, observer1)
+        liveEventData.removeObserver(observer)
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
@@ -411,24 +415,24 @@ class LiveEventTest {
     fun `observe after remove owner multi owner`() {
         // Given
         owner.start()
-        liveEvent.observe(owner, observer)
+        liveEventData.observe(owner, observer)
         val owner1 = TestLifecycleOwner()
-        val observer1 = mock<Observer<Unit>>()
+        val observer1 = mock<Observer<String>>()
         owner1.start()
 
-        val event = Unit
+        val event = "event"
 
         // When
-        liveEvent.value = event
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
         verify(observer1, never()).onChanged(event)
 
         // When
-        liveEvent.observe(owner1, observer1)
-        liveEvent.removeObservers(owner)
-        liveEvent.value = event
+        liveEventData.observe(owner1, observer1)
+        liveEventData.removeObservers(owner)
+        liveEventData.value = event
 
         // Then
         verify(observer, times(1)).onChanged(event)
