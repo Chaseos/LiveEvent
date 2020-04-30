@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/hadilq/LiveEvent.svg?branch=master)](https://travis-ci.org/hadilq/LiveEvent)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.hadilq.liveevent/liveevent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.hadilq.liveevent/liveevent)
-
 Live Event
 ---
 This library holds a class to handle single live events in Android MVVM architectural pattern. This class is extended
@@ -10,28 +7,29 @@ to active observers, any observers that started observing after the emit won't b
 
 Usage
 ---
-This source has a sample app where you can find `LiveEventViewModel` in it, in which the `LiveEvent` class is used as
+This source has a sample app where you can find `LiveEventViewModel` in it, in which the `LiveEvent` and/or `LiveEventData` class is used as
 follows.
 ```kotlin
 class LiveEventViewModel : ViewModel() {
-    private val clickedState = LiveEvent<String>()
-    val state: LiveData<String> = clickedState
+    private val clickedState = LiveEvent()
+    val state: LiveData<Unit> = clickedState
+    
+    private val clickedDataState = LiveEventData<String>()
+    val dataState: LiveData<String> = clickedDataState
+    
+    private val clickedDataState2 = LiveEventData("event")
+    val dataState2: LiveData<String> = clickedState2
 
-    fun clicked() {
-        clickedState.value = ...
+    fun clicked() { // Below are just examples
+        clickedState.callEvent()
+        clickedState.postEvent()
+        clickedState.throttleEvent()
+        clickedState.throttlePostEvent()
+        
+        clickedDataState.value = ...
+        clickedDataState.post(...)
+        clickedDataState.throttleEvent(...)
+        clickedDataState.throttlePostEvent(...)
     }
 }
 ```
-
-Download
----
-Download via gradle
-```groovy
-implementation "com.github.hadilq.liveevent:liveevent:$libVersion"
-```
-where the `libVersion` is [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.hadilq.liveevent/liveevent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.hadilq.liveevent/liveevent).
-
-Contribution
----
-Just create your branch from the master branch, change it, write additional tests, satisfy all tests, create your pull
-request, thank you, you're awesome.
