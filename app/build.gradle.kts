@@ -11,8 +11,8 @@ android {
         applicationId = "com.hadilq.liveevent.sample"
         minSdkVersion(Versions.minSdkVersion)
         targetSdkVersion(Versions.targetSdkVersion)
-        versionCode = 103000
-        versionName = "1.3.0"
+        versionCode = 103010
+        versionName = "1.3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
