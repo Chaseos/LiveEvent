@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version Versions.kotlin_version
+    maven
 }
 /**
  * Copyright 2019 Hadi Lashkari Ghouchani
