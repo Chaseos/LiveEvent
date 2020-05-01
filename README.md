@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/Chaseos/LiveEvent.svg)](https://jitpack.io/#Chaseos/LiveEvent)
+
 Live Event
 ---
 This library holds a class to handle single live events in Android MVVM architectural pattern. This class is extended
